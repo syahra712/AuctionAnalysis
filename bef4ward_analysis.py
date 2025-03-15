@@ -11,10 +11,6 @@ URLS = {
     "Probox": "https://www.beforward.jp/toyota/probox/bw892545/id/10157960/"
 }
 
-# CSS Selectors for prices
-PRICE_YEN_SELECTOR = "span.price.ip-usd-price"
-PRICE_TOTAL_SELECTOR = "span#fn-vehicle-price-total-price"
-
 # CSV file name
 CSV_FILE = "bef4ward_price_tracking.csv"
 
@@ -29,12 +25,12 @@ def scrape_data(url):
         soup = BeautifulSoup(response.text, "html.parser")
 
         # Extracting price values
-        price_yen = soup.select_one(PRICE_YEN_SELECTOR)
-        price_total = soup.select_one(PRICE_TOTAL_SELECTOR)
+        price_yen = soup.select_one("span.price.ip-usd-price")
+        price_total = soup.select_one("span#fn-vehicle-price-total-price")
 
         price_yen_text = price_yen.get_text(strip=True) if price_yen else "N/A"
         price_total_text = price_total.get_text(strip=True) if price_total else "N/A"
-        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        timestamp = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
 
         return [timestamp, url, price_yen_text, price_total_text]
     else:
@@ -53,20 +49,14 @@ def save_to_csv(data):
     with open(CSV_FILE, "a", newline="", encoding="utf-8") as file:
         writer = csv.writer(file)
         if not file_exists:
-            writer.writerow(["Timestamp", "URL", "Price (JPY)", "Total Price"])
+            writer.writerow(["Timestamp", "URL", "Price (JPY)", "Total Price"])  # Write headers if file doesn't exist
         writer.writerow(data)
 
-# Main loop to run every 20 minutes until 12:00 PM
+# Main execution
 if __name__ == "__main__":
-    now = datetime.now()
-    
-    if now.hour >= 12:  # Stop if the current time is 12:00 PM or later
-        print("It's past 12:00 PM, stopping execution.")
-    else:
-        for name, url in URLS.items():
-            print(f"Scraping {name}...")
-            scraped_data = scrape_data(url)
-            if scraped_data:
-                save_to_csv(scraped_data)
-                print(f"Data saved for {name}: {scraped_data}")
-        print("Scraping completed!")
+    for name, url in URLS.items():
+        print(f"Scraping {name}...")
+        scraped_data = scrape_data(url)
+        if scraped_data:
+            save_to_csv(scraped_data)
+            print(f"Data saved for {name}: {scraped_data}")
