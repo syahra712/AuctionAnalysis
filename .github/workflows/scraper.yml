@@ -3,7 +3,7 @@ name: Scrape and Update CSV
 on:
   schedule:
     - cron: '*/20 * * * *'  # Runs every 20 minutes
-  workflow_dispatch:  # Allows manual triggering
+  workflow_dispatch:  # Allows manual trigger
 
 jobs:
   scrape:
@@ -12,6 +12,8 @@ jobs:
     steps:
     - name: Checkout repository
       uses: actions/checkout@v3
+      with:
+        token: ${{ secrets.GH_PAT }}
 
     - name: Set up Python
       uses: actions/setup-python@v3
