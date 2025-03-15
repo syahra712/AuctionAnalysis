@@ -1,0 +1,35 @@
+name: Scrape Beforward Prices
+
+on:
+  schedule:
+    - cron: "*/20 * * * *"  # Runs every 20 minutes
+  workflow_dispatch:  # Allows manual execution
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: |
+          pip install requests beautifulsoup4
+
+      - name: Run scraper
+        run: python bef4ward_analysis.py
+
+      - name: Commit and push CSV
+        run: |
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
+          git add beforward_price_tracking.csv
+          git commit -m "Updated scraped data"
+          git push
+
