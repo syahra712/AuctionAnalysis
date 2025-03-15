@@ -16,7 +16,7 @@ PRICE_YEN_SELECTOR = "span.price.ip-usd-price"
 PRICE_TOTAL_SELECTOR = "span#fn-vehicle-price-total-price"
 
 # CSV file name
-CSV_FILE = "beforward_price_tracking.csv"
+CSV_FILE = "bef4ward_price_tracking.csv"
 
 # Function to fetch and parse data
 def scrape_data(url):
@@ -56,14 +56,17 @@ def save_to_csv(data):
             writer.writerow(["Timestamp", "URL", "Price (JPY)", "Total Price"])
         writer.writerow(data)
 
-# Main loop to run every 20 minutes
+# Main loop to run every 20 minutes until 12:00 PM
 if __name__ == "__main__":
-    while True:
+    now = datetime.now()
+    
+    if now.hour >= 12:  # Stop if the current time is 12:00 PM or later
+        print("It's past 12:00 PM, stopping execution.")
+    else:
         for name, url in URLS.items():
             print(f"Scraping {name}...")
             scraped_data = scrape_data(url)
             if scraped_data:
                 save_to_csv(scraped_data)
                 print(f"Data saved for {name}: {scraped_data}")
-        print("Waiting for 20 minutes...")
-        time.sleep(10)  # Wait for 20 minutes (1200 seconds)
+        print("Scraping completed!")
